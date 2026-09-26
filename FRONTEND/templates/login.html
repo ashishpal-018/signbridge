@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>SignBridge</title></head>
+<body>
+<main>
+  <h1>SignBridge</h1>
+  <p>Accessible AI learning for blind and deaf students.</p>
+  {% if message %}<p role="status">{{ message }}</p>{% endif %}
+  <section>
+    <h2>Log in</h2>
+    <form action="/login" method="post">
+      <label>Username <input name="username" required autocomplete="username"></label>
+      <label>Password <input name="password" type="password" required autocomplete="current-password"></label>
+      <button type="submit">Log in</button>
+    </form>
+  </section>
+  <section>
+    <h2>Create account</h2>
+    <form action="/register" method="post">
+      <label>Username <input name="username" required minlength="3" maxlength="32" autocomplete="username"></label>
+      <label>Password <input name="password" type="password" required minlength="8" autocomplete="new-password"></label>
+      <label>Learning mode <select name="role"><option value="blind">Blind learner</option><option value="deaf">Deaf learner</option></select></label>
+      <button type="submit">Register</button>
+    </form>
+  </section>
+</main>
+</body>
+</html>

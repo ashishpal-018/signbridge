@@ -1,0 +1,83 @@
+import sqlite3
+import hashlib
+import os
+
+DB_PATH = os.path.join(os.path.dirname(__file__), "database.sqlite")
+
+def init_db():
+    """Initializes SQLite and creates users and history tables."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    # Users table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            role TEXT NOT NULL CHECK(role IN ('blind', 'deaf'))
+        )
+    ''')
+    
+    # Learning history table (Tracks what users have studied)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            topic TEXT NOT NULL,
+            lesson_text TEXT NOT NULL,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    conn.commit()
+    conn.close()
+
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def register_user(username, password, role):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    hashed_pwd = hash_password(password)
+    try:
+        cursor.execute("INSERT INTO users (username, password, role) VALUES (?, ?, ?)", 
+                       (username, hashed_pwd, role))
+        conn.commit()
+        return True, "Registration successful!"
+    except sqlite3.IntegrityError:
+        return False, "Username already exists."
+    finally:
+    
+        conn.close()
+
+def authenticate_user(username, password):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    hashed_pwd = hash_password(password)
+    cursor.execute("SELECT role FROM users WHERE username = ? AND password = ?", (username, hashed_pwd))
+    result = cursor.fetchone()
+    conn.close()
+    if result:
+        return True, result[0]
+    return False, "Invalid credentials."
+
+# --- NEW FUNCTIONS FOR TRACKING ---
+
+def save_user_lesson(username, topic, lesson_text):
+    """Saves an AI-generated lesson to the user's history."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO history (username, topic, lesson_text) VALUES (?, ?, ?)",
+                   (username, topic, lesson_text))
+    conn.commit()
+    conn.close()
+
+def get_user_history(username):
+    """Retrieves all past lessons studied by a specific user."""
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT topic, lesson_text, timestamp FROM history WHERE username = ? ORDER BY id DESC", (username,))
+    rows = cursor.fetchall()
+    conn.close()
+    return rows

@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>SignBridge | Deaf portal</title></head>
+<body>
+<main>
+  <nav><strong>SignBridge</strong> <span>Deaf mode</span> <span>Welcome, {{ username }}</span> <a href="/logout">Log out</a></nav>
+  <h1>Visual learning assistant</h1>
+  <form action="/deaf-dashboard" method="post">
+    <label>Topic <input name="topic" value="{{ topic }}" required maxlength="200"></label>
+    <button type="submit">Generate lesson</button>
+  </form>
+  {% if lesson %}<article><h2>{{ topic }}</h2><div>{{ lesson }}</div></article>{% endif %}
+  {% if history %}<h2>Recent lessons</h2><ul>{% for item in history %}<li>{{ item.topic }} <time>{{ item.created_at }}</time></li>{% endfor %}</ul>{% endif %}
+</main>
+</body>
+</html>

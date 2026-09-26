@@ -1,0 +1,1 @@
+"""Login page is rendered from templates/login.html."""
