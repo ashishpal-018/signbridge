@@ -1,0 +1,9 @@
+﻿BACKEND/venv/
+node_modules/
+client/node_modules/
+.env
+*.sqlite
+__pycache__/
+.DS_Store
+dist/
+build/

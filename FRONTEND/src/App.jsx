@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const API_URL = "/api";
+const API_URL = "https://your-backend-url.onrender.com/api"; // Replace with your Render URL or http://127.0.0.1:8000/api for local
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -12,17 +12,27 @@ export default function App() {
 
   const [topic, setTopic] = useState("");
   const [lesson, setLesson] = useState("");
+  const [quiz, setQuiz] = useState("");
+  const [streak, setStreak] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [quizLoading, setQuizLoading] = useState(false);
   const [history, setHistory] = useState([]);
 
   useEffect(() => {
     if (user) {
-      fetch(`${API_URL}/history`, { credentials: "include" })
-        .then(res => res.json())
-        .then(data => setHistory(data))
-        .catch(err => console.error(err));
+      fetchData();
     }
   }, [user]);
+
+  const fetchData = () => {
+    fetch(`${API_URL}/history/${user.username}`)
+      .then(res => res.json())
+      .then(data => {
+        setHistory(data.history);
+        setStreak(data.streak);
+      })
+      .catch(err => console.error(err));
+  };
 
   const handleAuth = async (e) => {
     e.preventDefault();
@@ -32,8 +42,7 @@ export default function App() {
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ username, password, ...(isRegistering ? { role } : {}) })
+        body: JSON.stringify({ username, password, role })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Authentication failed");
@@ -43,6 +52,7 @@ export default function App() {
         setIsRegistering(false);
       } else {
         setUser({ username: data.username, role: data.role });
+        setStreak(data.streak || 1);
       }
     } catch (err) {
       setMessage(err.message);
@@ -52,22 +62,36 @@ export default function App() {
   const handleGenerate = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setQuiz("");
     try {
       const res = await fetch(`${API_URL}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ topic, mode: user.role })
+        body: JSON.stringify({ username: user.username, topic, mode: user.role })
       });
       const data = await res.json();
       setLesson(data.lesson);
-      
-      const histRes = await fetch(`${API_URL}/history`, { credentials: "include" });
-      setHistory(await histRes.json());
+      fetchData();
     } catch (err) {
-      alert("Failed to generate lesson from local AI.");
+      alert("Failed to generate lesson from AI.");
     }
     setLoading(false);
+  };
+
+  const handleFetchQuiz = async () => {
+    setQuizLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/quiz`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: user.username, topic, mode: user.role })
+      });
+      const data = await res.json();
+      setQuiz(data.quiz);
+    } catch (err) {
+      alert("Failed to load quiz.");
+    }
+    setQuizLoading(false);
   };
 
   const speak = (text) => {
@@ -118,13 +142,16 @@ export default function App() {
             <span className="text-xl font-black text-white">Sign<span className={isBlind ? "text-blue-400" : "text-purple-400"}>Bridge</span></span>
             <span className="ml-3 text-xs bg-slate-800 px-3 py-1 rounded-full uppercase font-bold">{user.role} Mode</span>
           </div>
-          <button onClick={() => setUser(null)} className="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg">Log Out</button>
+          <div className="flex items-center gap-3">
+            <span className="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 px-3 py-1 rounded-full font-bold">🔥 {streak} Day Streak</span>
+            <button onClick={() => setUser(null)} className="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded-lg">Log Out</button>
+          </div>
         </nav>
 
         <h1 className={`text-2xl font-extrabold mb-2 ${isBlind ? "text-blue-400" : "text-purple-400"}`}>
           {isBlind ? "Audio Learning Assistant" : "Visual Learning Assistant"}
         </h1>
-        <p className="text-slate-400 text-sm mb-6">Enter a topic to generate your tailored AI learning module.</p>
+        <p className="text-slate-400 text-sm mb-6">Enter a topic to generate your tailored AI learning module & quiz.</p>
 
         <form onSubmit={handleGenerate} className="space-y-4">
           <input type="text" placeholder="e.g., Photosynthesis, Quantum Physics..." value={topic} onChange={e => setTopic(e.target.value)} required className="w-full p-4 bg-slate-950 rounded-xl border border-slate-800 text-white" />
@@ -144,7 +171,18 @@ export default function App() {
                 </div>
               )}
             </div>
-            <div className="text-slate-200 leading-relaxed whitespace-pre-line font-light">{lesson}</div>
+            <div className="text-slate-200 leading-relaxed whitespace-pre-line font-light mb-6">{lesson}</div>
+
+            <button onClick={handleFetchQuiz} disabled={quizLoading} className="w-full bg-indigo-600 hover:bg-indigo-500 p-3 rounded-xl font-bold text-sm transition">
+              {quizLoading ? "Generating Quiz..." : "🧠 Take Knowledge Quiz"}
+            </button>
+          </div>
+        )}
+
+        {quiz && (
+          <div className="mt-6 p-6 bg-indigo-950/40 rounded-2xl border border-indigo-900/50">
+            <h3 className="font-bold text-indigo-300 text-lg mb-3">Knowledge Check Quiz</h3>
+            <div className="text-indigo-100 leading-relaxed whitespace-pre-line font-light">{quiz}</div>
           </div>
         )}
 
@@ -154,7 +192,7 @@ export default function App() {
             {history.map((h, i) => (
               <li key={i} className="bg-slate-950/50 p-3.5 rounded-xl border border-slate-800 text-sm flex justify-between text-slate-300">
                 <span>📚 <strong>{h.topic}</strong></span>
-                <span className="text-xs text-slate-500">{h.created_at}</span>
+                <span className="text-xs text-slate-500">{h.timestamp}</span>
               </li>
             ))}
           </ul>
