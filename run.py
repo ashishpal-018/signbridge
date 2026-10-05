@@ -1,7 +1,7 @@
 import os
 import sys
 
-# Anchor paths so BACKEND and FRONTEND are cleanly importableh hii
+# Anchor paths so BACKEND and FRONTEND are cleanly importableh
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(ROOT_DIR, "BACKEND"))
 sys.path.insert(0, os.path.join(ROOT_DIR, "FRONTEND"))
