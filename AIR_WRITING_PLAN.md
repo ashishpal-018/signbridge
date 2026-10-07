@@ -7,7 +7,7 @@
 4. A 1.2-second pause finalizes the current stroke. The learner can also stop tracking, clear the canvas, or explicitly request recognition.
 5. Tesseract.js OCR proposes editable English text from the stroke. The learner reviews or corrects the topic before submission.
 6. React sends `{ username, topic }` to `POST /api/air-writing-lesson`.
-7. FastAPI validates the topic, calls the existing sign-mode Ollama lesson generator, stores the lesson in anonymous history, and returns `{ username, topic, lesson }`.
+7. FastAPI validates the topic, calls the sign-mode Groq lesson generator, stores the lesson in anonymous history, and returns `{ username, topic, lesson }`.
 
 ## Implementation Tasks
 
@@ -27,7 +27,7 @@
 ### API and lesson generation
 - [x] Add `POST /api/air-writing-lesson` with username and topic fields.
 - [x] Reject blank topics and topics longer than 120 characters.
-- [x] Generate through the current Ollama-backed `generate_lesson(..., mode="sign")` service.
+- [x] Generate through the Groq-backed `generate_lesson(..., mode="sign")` service.
 - [x] Save generated lessons to the learner's anonymous history.
 
 ### Verification and release
@@ -37,4 +37,4 @@
 - [ ] Evaluate performance and accessibility on supported desktop and mobile browsers.
 
 ## Limitations
-This feature recognizes an air-written English word through OCR; MediaPipe only tracks the fingertip and does not recognize language itself. Handwriting quality, camera perspective, and motion blur can reduce OCR accuracy, so learners can edit the proposed topic before requesting a lesson. Lesson generation uses the project's existing local Ollama configuration (`OLLAMA_BASE_URL`, `OLLAMA_MODEL`).
+This feature recognizes an air-written English word through OCR; MediaPipe only tracks the fingertip and does not recognize language itself. Handwriting quality, camera perspective, and motion blur can reduce OCR accuracy, so learners can edit the proposed topic before requesting a lesson. Lesson generation uses the project's Groq configuration (`GROQ_API_KEY`, `GROQ_MODEL`).

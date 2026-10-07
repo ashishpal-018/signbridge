@@ -23,9 +23,9 @@ Provide three direct-entry learning pathways without requiring registration, whi
 - [x] Sign / Non-Speaking: provide camera start/stop, recognition status, confidence, a lesson result, and a typed-topic fallback.
 - Acceptance: each pathway has distinct interaction and presentation without blocking access to generated text.
 
-### 4. Sign inference and local Ollama lesson integration
+### 4. Sign inference and Groq lesson integration
 - [x] Reuse MediaPipe Hand Landmarker in the browser to produce 21 normalized hand landmarks.
-- [x] Add `POST /api/sign/lesson`: classify landmarks with `analyze_landmarks`, select a catalog topic, generate a sign-mode lesson with Ollama, and save it to the anonymous profile.
+- [x] Add `POST /api/sign/lesson`: classify landmarks with `analyze_landmarks`, select a catalog topic, generate a sign-mode lesson with Groq API, and save it to the anonymous profile.
 - [ ] Verify camera permission denial, no-hand detection, and successful landmark submission in a browser.
 - [ ] Evaluate the limited gesture catalog against representative users and improve confidence/confirmation handling.
 - Acceptance: a supported handshape produces a named catalog gesture and associated lesson; missing/unsupported landmarks return a clear validation error.
@@ -37,11 +37,11 @@ Provide three direct-entry learning pathways without requiring registration, whi
 - [ ] Before production sign-language claims, replace or supplement handshape heuristics with a validated, language-specific temporal sign model and representative consented data.
 
 ## Current Inference Boundary
-The browser performs camera capture and MediaPipe hand-landmark extraction. The backend currently uses a small rule-based landmark classifier over a fixed catalog; this is a useful gesture-to-topic prototype, not general sign-language translation. Lesson and quiz text is generated locally by Ollama using `OLLAMA_MODEL` (default `qwen2.5:3b`). Full language recognition needs a temporal model, language/dialect definition, representative evaluation data, and explicit user confirmation for uncertain predictions.
+The browser performs camera capture and MediaPipe hand-landmark extraction. The backend currently uses a small rule-based landmark classifier over a fixed catalog; this is a useful gesture-to-topic prototype, not general sign-language translation. Lesson and quiz text is generated across all modes by Groq API using `GROQ_MODEL` (default `qwen/qwen3.8-27b`). Full language recognition needs a temporal model, language/dialect definition, representative evaluation data, and explicit user confirmation for uncertain predictions.
 
 ## Validation Snapshot
 - Python compilation passed for the changed backend modules.
 - FastAPI smoke passed for direct landing, anonymous profile selection, landmark-to-lesson generation, history persistence, no-hand rejection, and removed `/login` route.
 - Client production build and oxlint passed.
 - Browser confirmed the direct mode chooser, sign screen, typed-topic API proxy, and cancellable camera setup; physical-device hand inference remains unverified.
-- Local Ollama lesson generation, quiz generation, and live FastAPI `/api/generate` passed with the installed `qwen2.5:3b` model.
+- Groq API lesson generation, quiz generation, and live FastAPI `/api/generate` passed across all modes with `qwen/qwen3.8-27b`.

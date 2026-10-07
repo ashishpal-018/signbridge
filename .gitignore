@@ -1,4 +1,4 @@
-﻿BACKEND/venv/
+BACKEND/venv/
 node_modules/
 client/node_modules/
 .env
@@ -7,3 +7,5 @@ __pycache__/
 .DS_Store
 dist/
 build/
+scratch/
+
