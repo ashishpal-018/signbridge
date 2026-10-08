@@ -15,4 +15,10 @@ if __name__ == "__main__":
     print("===========================================================")
     print(f"  SignBridge Server starting at http://127.0.0.1:{port}")
     print("===========================================================")
-    uvicorn.run("main:app", host="127.0.0.1", port=port, reload=True, app_dir=os.path.join(ROOT_DIR, "FRONTEND"))
+    uvicorn.run(
+    "main:app",
+    host="0.0.0.0",
+    port=port,
+    reload=False,
+    app_dir=os.path.join(ROOT_DIR, "FRONTEND")
+)
