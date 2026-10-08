@@ -2,3 +2,4 @@
 uvicorn
 sqlalchemy
 python-dotenv
+python-multipart
