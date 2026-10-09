@@ -1,0 +1,18 @@
+# Render.com Blueprint configuration for SignBridge
+# Learn more: https://render.com/docs/blueprint-spec
+
+services:
+  # Single Unified Container Service (Recommended: Bundles Backend & React Frontend)
+  - type: web
+    name: signbridge
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /api/history
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: qwen/qwen3.8-27b
+      - key: DATABASE_PATH
+        value: ./database.sqlite

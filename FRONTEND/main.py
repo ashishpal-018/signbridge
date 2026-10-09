@@ -23,7 +23,15 @@ from database import (
 from sign_detector import SIGN_CATALOG, analyze_landmarks
 from ai_engine import generate_lesson, generate_quiz, generate_structured_blind_quiz, generate_structured_deaf_quiz, generate_chat_response
 
+from fastapi.staticfiles import StaticFiles
+
 app = FastAPI(title="SignBridge API & Web App", version="1.0.0")
+
+# Mount React frontend static build if built
+CLIENT_DIST_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../client/dist'))
+if os.path.exists(CLIENT_DIST_DIR):
+    app.mount("/app", StaticFiles(directory=CLIENT_DIST_DIR, html=True), name="react_app")
+
 
 # Enable CORS for the React frontends
 app.add_middleware(
