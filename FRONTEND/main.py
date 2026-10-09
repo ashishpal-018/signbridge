@@ -9,7 +9,7 @@ if BACKEND_DIR not in sys.path:
     sys.path.append(BACKEND_DIR)
 
 from fastapi import FastAPI, Form, Request, HTTPException, status
-from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -30,7 +30,11 @@ app = FastAPI(title="SignBridge API & Web App", version="1.0.0")
 # Mount React frontend static build if built
 CLIENT_DIST_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '../client/dist'))
 if os.path.exists(CLIENT_DIST_DIR):
+    assets_dir = os.path.join(CLIENT_DIST_DIR, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="react_assets")
     app.mount("/app", StaticFiles(directory=CLIENT_DIST_DIR, html=True), name="react_app")
+
 
 
 # Enable CORS for the React frontends
@@ -125,9 +129,13 @@ def layout(title: str, content: str) -> str:
     """
 
 # --- WEB PORTAL: AUTHENTICATION ---
-@app.get("/", response_class=HTMLResponse)
+@app.get("/")
 def read_root(message: str = ""):
+    index_path = os.path.join(CLIENT_DIST_DIR, "index.html")
+    if os.path.exists(index_path):
+        return FileResponse(index_path)
     msg_box = f'<div class="bg-indigo-950/60 border border-indigo-500/40 text-indigo-300 p-3.5 rounded-xl mb-6 text-sm text-center font-medium shadow-inner">{message}</div>' if message else ""
+
 
     html = f"""
         <div class="text-center mb-8">
